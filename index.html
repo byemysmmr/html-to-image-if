@@ -206,7 +206,7 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
 <script>
 (function(){
   var $=function(id){return document.getElementById(id);};
@@ -405,18 +405,13 @@
     var ready = (d.fonts && d.fonts.ready) ? d.fonts.ready : Promise.resolve();
 
     return ready.then(function(){
-      return html2canvas(el, {
-        backgroundColor: trans.checked ? null : bg.value,
-        scale: scale,
+      return htmlToImage.toCanvas(el, {
+        backgroundColor: trans.checked ? undefined : bg.value,
+        pixelRatio: scale,
         width: w,
         height: h,
-        windowWidth: w,
-        windowHeight: h,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        scrollX: 0,
-        scrollY: 0
+        canvasWidth: w,
+        canvasHeight: h
       });
     }).then(function(cv){ undo(); return cv; }, function(err){ undo(); throw err; });
   }
