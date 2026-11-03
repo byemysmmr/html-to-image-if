@@ -30,19 +30,22 @@
   :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px;}
   ::selection{background:var(--accent);color:#fff;}
 
-  .wrap{max-width:1180px;margin:0 auto;}
+  .wrap{max-width:min(1680px,97vw);margin:0 auto;}
   .head{margin-bottom:18px;}
   .head h1{font-size:15px;font-weight:700;letter-spacing:.1em;margin:0 0 5px;}
   .head p{font-size:12px;color:var(--ink-3);margin:0;}
 
-  .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;}
+  /* 코드는 왼쪽에 몰아두고, 남는 폭은 전부 미리보기에 준다 */
+  .cols{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;align-items:start;}
+  .cols.wide{grid-template-columns:minmax(0,1fr);}
+  .cols.wide>section:first-child{display:none;}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0;}
 
   .ctop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
   .ctop h2{font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0;}
   .ctop .acts{display:flex;gap:5px;}
 
-  textarea{width:100%;height:340px;resize:vertical;padding:12px 13px;background:var(--panel-2);
+  textarea{width:100%;height:470px;resize:vertical;padding:12px 13px;background:var(--panel-2);
     border:1px solid var(--line);border-radius:var(--r);color:var(--ink);
     font-family:var(--mono);font-size:12.5px;line-height:1.65;letter-spacing:0;
     tab-size:2;white-space:pre;overflow-wrap:normal;overflow-x:auto;}
@@ -87,7 +90,7 @@
       linear-gradient(45deg,#e4e4e0 25%,transparent 25%,transparent 75%,#e4e4e0 75%),
       linear-gradient(45deg,#e4e4e0 25%,transparent 25%,transparent 75%,#e4e4e0 75%);
     background-size:16px 16px;background-position:0 0,8px 8px;
-    max-height:600px;padding:14px;}
+    max-height:min(820px,80vh);padding:14px;}
   .stage.plain{background-image:none;}
   .holder{transform-origin:top left;width:max-content;}
   iframe{display:block;border:none;background:transparent;box-shadow:0 1px 0 rgba(0,0,0,.05),0 6px 22px rgba(0,0,0,.07);}
@@ -107,6 +110,7 @@
   .mini{height:27px;padding:0 10px;font-size:11.5px;background:transparent;
     border:1px solid var(--line);color:var(--ink-2);border-radius:6px;cursor:pointer;}
   .mini:hover{background:var(--panel-2);color:var(--ink);}
+  .mini[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
   .mini[disabled]{opacity:.4;pointer-events:none;}
 
   .bar{display:flex;gap:7px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;align-items:center;}
@@ -180,6 +184,7 @@
       <div class="ctop">
         <h2>미리보기</h2>
         <div class="acts">
+          <button class="mini" id="bWide">코드 숨기기</button>
           <button class="mini" id="bFit" aria-pressed="true">폭 맞추기</button>
         </div>
       </div>
@@ -214,8 +219,9 @@
 
   var src=$('src'), fr=$('fr'), stage=$('stage'), holder=$('holder');
   var padIn=$('pad'), bg=$('bg'), bgHex=$('bgHex'), trans=$('trans');
-  var runjs=$('runjs'), bFit=$('bFit'), msg=$('msg'), dim=$('dim'), zoom=$('zoom');
-  var scale=2, fitOn=true;
+  var runjs=$('runjs'), bFit=$('bFit'), bWide=$('bWide'), msg=$('msg'), dim=$('dim'), zoom=$('zoom');
+  var cols=document.querySelector('.cols');
+  var scale=2, fitOn=true, wideOn=false;
   var PROBE=3000;      // 폭을 잴 때만 잠깐 넓혀두는 값
   var MAXW=600;        // 폭이 안 정해진 글이 한 줄로 길어질 때 끊는 지점
   var curW=MAXW;
@@ -225,7 +231,7 @@
     try{
       localStorage.setItem(KEY, JSON.stringify({
         src:src.value, pad:padIn.value, bg:bg.value,
-        trans:trans.checked, runjs:runjs.checked, scale:scale, fit:fitOn
+        trans:trans.checked, runjs:runjs.checked, scale:scale, fit:fitOn, wide:wideOn
       }));
     }catch(e){}
   }
@@ -240,6 +246,7 @@
     runjs.checked=!!d.runjs;
     if(d.scale) scale=+d.scale;
     if(d.fit!=null) fitOn=!!d.fit;
+    if(d.wide!=null) wideOn=!!d.wide;
   }
 
   /* ---------- 미리보기 만들기 ---------- */
@@ -511,6 +518,17 @@
     fit(); save();
   };
 
+  // 코드 칸을 접어 미리보기에 폭을 다 준다
+  function wideUI(){
+    cols.classList.toggle('wide', wideOn);
+    bWide.setAttribute('aria-pressed', wideOn?'true':'false');
+    bWide.textContent = wideOn ? '코드 보기' : '코드 숨기기';
+  }
+  bWide.onclick=function(){
+    wideOn=!wideOn;
+    wideUI(); fit(); save();
+  };
+
   $('bClear').onclick=function(){ src.value=''; schedule(); src.focus(); };
 
   window.addEventListener('resize', fit);
@@ -522,6 +540,7 @@
     x.setAttribute('aria-pressed', +x.getAttribute('data-v')===scale ? 'true' : 'false');
   });
   bFit.setAttribute('aria-pressed', fitOn?'true':'false');
+  wideUI();
   transUI();
   render();
 })();
