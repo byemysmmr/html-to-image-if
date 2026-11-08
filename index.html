@@ -336,7 +336,6 @@
 
     var inner=measure(d);
     if(!inner){
-      // 폭이 안 정해진 내용. 글 길이만큼만 쓰되 너무 길면 끊는다
       var bw=d.body?d.body.style.width:'';
       if(d.body) d.body.style.width='max-content';
       de.style.width='max-content';
@@ -352,7 +351,6 @@
     fr.style.width=curW+'px';
   }
 
-  // 본문에 배경색을 직접 준 경우, 여백 자리까지 그 색이 깔리게 한다
   function syncBg(){
     var d=doc(); if(!d || !d.body) return;
     var bb=getComputedStyle(d.body).backgroundColor;
@@ -458,25 +456,25 @@
         say('저장했어요', 'ok'); b.disabled=false;
       }, 'image/png');
     }).catch(function(e){
-      say(e && e.message ? e.message : '저장하지 못했어요', 'err');
+      say(e && e.message ? e.message : '저장하지 못했어요 ㅜㅜ', 'err');
       b.disabled=false;
     });
   };
 
   $('bCopy').onclick=function(){
     var b=this;
-    if(!(navigator.clipboard && window.ClipboardItem)){ say('이 브라우저는 복사를 지원하지 않아요', 'err'); return; }
+    if(!(navigator.clipboard && window.ClipboardItem)){ say('이 브라우저는 복사를 지원 안 해요 ㅜㅜ', 'err'); return; }
     b.disabled=true; say('그리는 중…');
     shoot().then(function(cv){
       return new Promise(function(res,rej){
-        cv.toBlob(function(blob){ blob?res(blob):rej(new Error('그리지 못했어요')); }, 'image/png');
+        cv.toBlob(function(blob){ blob?res(blob):rej(new Error('그리지 못했어요 ㅜㅜ')); }, 'image/png');
       });
     }).then(function(blob){
       return navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
     }).then(function(){
       say('복사했어요', 'ok'); b.disabled=false;
     }).catch(function(e){
-      say(e && e.message ? e.message : '복사하지 못했어요', 'err');
+      say(e && e.message ? e.message : '복사하지 못했어요 ㅜㅜ', 'err');
       b.disabled=false;
     });
   };
